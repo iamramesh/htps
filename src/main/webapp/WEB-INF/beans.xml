@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:jaxrs="http://cxf.apache.org/jaxrs"
+  xmlns:aop="http://www.springframework.org/schema/aop" xmlns:security="http://www.springframework.org/schema/security"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+  	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd 
+  	http://www.springframework.org/schema/security 
+  	http://www.springframework.org/schema/security/spring-security-3.0.4.xsd
+	http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd">
+
+ 	<import resource="classpath:META-INF/cxf/cxf.xml" />
+	<import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
+	<jaxrs:server id="CustService" address="/">
+    <jaxrs:serviceBeans>
+      <ref bean="customerService" />
+    </jaxrs:serviceBeans>
+    <jaxrs:providers>
+      <bean class="com.mera.ssl.htps.server.SecurityExceptionMapper" />
+    </jaxrs:providers>
+  </jaxrs:server>
+
+  <bean id="customerService" class="com.mera.ssl.htps.server.CustomerServiceImpl" />
+
+	<security:global-method-security secured-annotations="enabled">
+		<security:protect-pointcut expression="execution(* com.mera.ssl.htps.common.CustomerService.getCustomer(*))" access="ROLE_CUSTOMER,ROLE_ADMIN"/>
+		<security:protect-pointcut expression="execution(* com.mera.ssl.htps.common.CustomerService.addCustomer(*))" access="ROLE_ADMIN"/>
+		<security:protect-pointcut expression="execution(* com.mera.ssl.htps.common.CustomerService.updateCustomer(com.mera.ssl.htps.common.Customer))" access="ROLE_ADMIN"/>
+		<security:protect-pointcut expression="execution(* com.mera.ssl.htps.common.CustomerService.deleteCustomer(*))" access="ROLE_ADMIN"/>
+	</security:global-method-security>
+		<security:http auto-config="true" use-expressions="true">
+		<security:http-basic/>
+		</security:http>
+	<security:authentication-manager>
+	<security:authentication-provider>
+		<security:user-service>
+		<security:user name="ram" password="pas1" authorities="ROLE_CUSTOMER"/>
+		<security:user name="shyam" password="pas2" authorities="ROLE_CUSTOMER, ROLE_ADMIN"/>
+		</security:user-service>
+	</security:authentication-provider>
+	</security:authentication-manager>
+</beans>
